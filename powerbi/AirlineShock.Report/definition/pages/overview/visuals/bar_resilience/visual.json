@@ -5,7 +5,7 @@
     "x": 656,
     "y": 192,
     "width": 600,
-    "height": 246,
+    "height": 300,
     "z": 9,
     "tabOrder": 9
   },
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dim_brand.brand",
-              "nativeQueryRef": "brand"
+              "nativeQueryRef": "Brand",
+              "displayName": "Brand"
             }
           ]
         },

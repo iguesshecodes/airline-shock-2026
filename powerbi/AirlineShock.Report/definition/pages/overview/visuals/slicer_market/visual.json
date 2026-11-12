@@ -27,13 +27,29 @@
                 }
               },
               "queryRef": "dim_brand.home_market",
-              "nativeQueryRef": "home_market"
+              "nativeQueryRef": "Market",
+              "displayName": "Market"
             }
           ]
         }
       }
     },
     "drillFilterOtherVisuals": true,
+    "objects": {
+      "header": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {

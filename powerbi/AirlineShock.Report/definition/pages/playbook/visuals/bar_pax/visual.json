@@ -3,9 +3,9 @@
   "name": "bar_pax",
   "position": {
     "x": 24,
-    "y": 426,
+    "y": 366,
     "width": 610,
-    "height": 270,
+    "height": 330,
     "z": 4,
     "tabOrder": 4
   },
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dim_brand.brand",
-              "nativeQueryRef": "brand"
+              "nativeQueryRef": "Brand",
+              "displayName": "Brand"
             }
           ]
         },

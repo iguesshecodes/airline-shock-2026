@@ -106,7 +106,7 @@ M.append(measure("Resilience Score",
     "\"+0.0;-0.0;0.0\"", "3 Scoring",
     "Passenger change in % points plus load factor change in points, equal weights. A simple, documented rule, not a model."))
 M.append(measure("Resilience Rank",
-    "VAR s = [Resilience Score]\nRETURN IF(ISBLANK(s), BLANK(), RANKX(ALLSELECTED(dim_brand[brand]), [Resilience Score], , DESC, Dense))",
+    "VAR s = [Resilience Score]\nRETURN IF(ISBLANK(s) || NOT HASONEVALUE(dim_brand[brand]), BLANK(), RANKX(ALLSELECTED(dim_brand), [Resilience Score], , DESC, Dense))",
     "0", "3 Scoring"))
 M.append(measure("Capacity Stance",
     'VAR c = [Capacity Change %]\nRETURN IF(ISBLANK(c), "No matched data", IF(c >= 0.02, "Added capacity", IF(c <= -0.02, "Cut capacity", "Held capacity")))',
@@ -164,8 +164,10 @@ def col(entity, prop):
     return {"Column": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}}
 def mea(prop, entity="fact_traffic"):
     return {"Measure": {"Expression": {"SourceRef": {"Entity": entity}}, "Property": prop}}
+NICE = {"brand": "Brand", "home_market": "Market", "business_model": "Model", "month": "Month"}
 def proj(field, entity, prop, active=False):
-    p = {"field": field, "queryRef": f"{entity}.{prop}", "nativeQueryRef": prop}
+    p = {"field": field, "queryRef": f"{entity}.{prop}", "nativeQueryRef": NICE.get(prop, prop)}
+    if prop in NICE: p["displayName"] = NICE[prop]
     pass
     return p
 def C(prop): return proj(col("dim_brand" if prop in ("brand", "home_market", "business_model") else "dim_date", prop),
@@ -198,20 +200,22 @@ def textbox(runs):
     return {"visualType": "textbox", "drillFilterOtherVisuals": True,
             "objects": {"general": [{"properties": {"paragraphs": [{"textRuns": runs}]}}]}}
 
-def header(page_title_suffix=""):
-    out = []
-    out.append(container("hdr_bg", 0, 0, 1280, 72, 0, {
+def shape_text(name, x, y, wd, ht, z, text, fill_hex=None, color="#FFFFFF", size="22D", bold=True, align="left"):
+    fill = [{"properties": {"show": lit("true"), "fillColor": solid(fill_hex), "transparency": lit("0D")}}] if fill_hex else \
+           [{"properties": {"show": lit("false")}}]
+    return container(name, x, y, wd, ht, z, {
         "visualType": "shape", "drillFilterOtherVisuals": True,
-        "objects": {"shape": [{"properties": {"tileShape": S("rectangle")}}],
-                    "fill": [{"properties": {"fillColor": solid(INK), "transparency": lit("0D")}}],
-                    "outline": [{"properties": {"show": lit("false")}}]}}))
-    out.append(container("hdr_title", 24, 10, 820, 52, 1, textbox([{
-        "value": "The 2026 airline shock: who handled it best?",
-        "textStyle": {"fontFamily": "Segoe UI Semibold", "fontWeight": "bold", "fontSize": "22pt", "color": "#FFFFFF"}}])))
-    out.append(container("hdr_note", 860, 14, 396, 48, 2, textbox([{
-        "value": "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
-        "textStyle": {"fontSize": "9pt", "color": "#BFD1FF"}}])))
-    return out
+        "objects": {"shape": [{"properties": {"tileShape": S("rectangle")}}], "fill": fill,
+                    "outline": [{"properties": {"show": lit("false")}}],
+                    "text": [{"properties": {"show": lit("true"), "text": S(text), "fontColor": solid(color),
+                                             "fontSize": lit(size), "bold": lit("true" if bold else "false"),
+                                             "horizontalAlignment": S(align), "verticalAlignment": S("middle")}}]}})
+
+def header(page_title_suffix=""):
+    return [shape_text("hdr_bg", 0, 0, 1280, 72, 0, "  The 2026 airline shock: who handled it best?", INK, "#FFFFFF", "22D", True),
+            shape_text("hdr_note", 760, 8, 500, 56, 1,
+                       "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
+                       None, "#BFD1FF", "10D", False, "right")]
 
 def page(name, display, visuals, order=None):
     d = f"{RP}/definition/pages/{name}"
@@ -224,22 +228,23 @@ def page(name, display, visuals, order=None):
 
 # page 1 : overview
 p1 = header()
-p1.append(container("slicer_market", 24, 84, 220, 96, 3, vis("slicer", {"Values": [B("home_market")]}), title="Market", card=True))
-kp = [("kpi_lf", "Load factor (all)", "Load Factor"),
+p1.append(container("slicer_market", 24, 84, 220, 96, 3, vis("slicer", {"Values": [B("home_market")]}, objects={"header": [{"properties": {"show": lit("false")}}]}), title="Market", card=True))
+kp = [("kpi_lf", "Load factor, all months", "Load Factor"),
       ("kpi_lfchg", "Load factor change (pts)", "LF Change (pts)"),
       ("kpi_cap", "Capacity change", "Capacity Change %"),
       ("kpi_pax", "Passenger change", "Passenger Change %")]
 for i, (n, t, m) in enumerate(kp):
     p1.append(container(n, 260 + i * 252, 84, 240, 96, 4 + i,
-                        vis("card", {"Values": [MS(m)]}), title=t, card=True))
+                        vis("card", {"Values": [MS(m)]}, objects={"categoryLabels": [{"properties": {"show": lit("false")}}]}), title=t, card=True))
 p1.append(container("scatter", 24, 192, 620, 504, 8, vis("scatterChart", {
     "Category": [B("brand")], "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")],
-    "X": [MS("Capacity Change %")], "Y": [MS("LF Change (pts)")]}),
+    "X": [MS("Capacity Change %")], "Y": [MS("LF Change (pts)")]},
+    objects={"categoryLabels": [{"properties": {"show": lit("true")}}]}),
     title="Did cutting capacity protect load factor? (each dot is a brand)", card=True))
-p1.append(container("bar_resilience", 656, 192, 600, 246, 9, vis("clusteredBarChart", {
+p1.append(container("bar_resilience", 656, 192, 600, 300, 9, vis("clusteredBarChart", {
     "Category": [B("brand")], "Y": [MS("Resilience Score")]}, sort="Resilience Score"),
     title="Resilience score by brand (higher is better)", card=True))
-p1.append(container("line_lf", 656, 450, 600, 246, 10, vis("lineChart", {
+p1.append(container("line_lf", 656, 504, 600, 192, 10, vis("lineChart", {
     "Category": [D("month")], "Y": [MS("Load Factor")],
     "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")]}),
     title="Monthly load factor by market", card=True))
@@ -247,21 +252,50 @@ page("overview", "Overview", p1)
 
 # page 2 : brand playbook
 p2 = header()
-p2.append(container("tbl_playbook", 24, 84, 1232, 330, 3, vis("tableEx", {"Values": [
+p2.append(container("tbl_playbook", 24, 84, 1232, 270, 3, vis("tableEx", {"Values": [
     B("brand"), proj(col("dim_brand", "home_market"), "dim_brand", "home_market"),
     proj(col("dim_brand", "business_model"), "dim_brand", "business_model"),
     MS("Capacity Stance"), MS("Capacity Change %"), MS("Passenger Change %"),
     MS("LF Change (pts)"), MS("Resilience Score"), MS("Resilience Rank"), MS("Matched Months")]}),
     title="Brand playbook (ranked by resilience, matched months only)", card=True))
-p2.append(container("bar_pax", 24, 426, 610, 270, 4, vis("clusteredBarChart", {
+p2.append(container("bar_pax", 24, 366, 610, 330, 4, vis("clusteredBarChart", {
     "Category": [B("brand")], "Y": [MS("Passenger Change %")]}, sort="Passenger Change %"),
     title="Passenger change vs 2025", card=True))
-p2.append(container("bar_lf", 646, 426, 610, 270, 5, vis("clusteredBarChart", {
+p2.append(container("bar_lf", 646, 366, 610, 330, 5, vis("clusteredBarChart", {
     "Category": [B("brand")], "Y": [MS("LF Change (pts)")]}, sort="LF Change (pts)"),
     title="Load factor change (pts)", card=True))
 page("playbook", "Brand playbook", p2)
 
+# page 3 : findings and recommendations (text only, numbers verified against the CSVs in Python)
+def note_box(name, x, y, wd, ht, z, title, paras):
+    runs = []
+    for text, bold in paras:
+        runs.append({"textRuns": [{"value": text, "textStyle": {"fontSize": "12pt", **({"fontWeight": "bold"} if bold else {})}}]})
+        runs.append({"textRuns": [{"value": " ", "textStyle": {"fontSize": "6pt"}}]})
+    v = {"visualType": "textbox", "drillFilterOtherVisuals": True,
+         "objects": {"general": [{"properties": {"paragraphs": runs}}]}}
+    return container(name, x, y, wd, ht, z, v, title=title, card=True)
+
+p3 = header()
+p3.append(note_box("txt_findings", 24, 84, 740, 612, 3, "Three findings", [
+    ("1. Like for like, the shock was mild overall.", True),
+    ("Capacity +0.7%, passengers +0.2%, load factor -0.5 pts (Mar to Aug 2026 vs 2025). The average hides large differences between airlines.", False),
+    ("2. Adding capacity worked only where demand followed.", True),
+    ("Jet2 grew seats 5.7% and passengers 8.9% while load factor rose 1.2 pts. easyJet added 7.2% more seats and lost 3.6 pts of load factor.", False),
+    ("3. Cutting capacity protected load factor but cost passengers.", True),
+    ("Air India Group cut seats 9.0% and Ryanair UK 7.6%. Both held load factor (+0.5 and +0.3 pts) and lost 7.2% and 5.2% of passengers. TUI Airways is the exception: seats -3.7% and load factor -2.9 pts.", False)]))
+p3.append(note_box("txt_recs", 776, 84, 480, 300, 4, "Two recommendations", [
+    ("1. Treat load factor as a guardrail, not the goal.", True),
+    ("Cutting seats held load factor at Ryanair UK and Air India but cost 5 to 7% of passengers. Cut only where the volume lost is worth less than the cost saved.", False),
+    ("2. Add capacity only where demand is proven, and review load factor monthly.", True),
+    ("Jet2 shows growth can fill planes. easyJet shows it can dilute them.", False)]))
+p3.append(note_box("txt_limits", 776, 396, 480, 300, 5, "Limits and assumptions", [
+    ("Simulated brief: Head of Network and Revenue at a mid-size airline. Descriptive, not causal.", False),
+    ("10 airlines, 6 months. SpiceJet excluded (no 2025 data). UK (CAA) and India (DGCA) definitions differ. No yield or fare data, so profit and pricing are not assessed.", False),
+    ("Wizz Air UK passengers rose while seat-km fell, probably shorter average routes. Not verified.", False)]))
+page("findings", "Findings", p3)
+
 wj(f"{RP}/definition/pages/pages.json", {
     "$schema": f"{SCH}/pagesMetadata/1.0.0/schema.json",
-    "pageOrder": ["overview", "playbook"], "activePageName": "overview"})
+    "pageOrder": ["overview", "playbook", "findings"], "activePageName": "overview"})
 print("PBIP written under", ROOT)

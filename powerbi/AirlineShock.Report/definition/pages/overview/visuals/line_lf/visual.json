@@ -3,9 +3,9 @@
   "name": "line_lf",
   "position": {
     "x": 656,
-    "y": 450,
+    "y": 504,
     "width": 600,
-    "height": 246,
+    "height": 192,
     "z": 10,
     "tabOrder": 10
   },
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dim_date.month",
-              "nativeQueryRef": "month"
+              "nativeQueryRef": "Month",
+              "displayName": "Month"
             }
           ]
         },
@@ -63,7 +64,8 @@
                 }
               },
               "queryRef": "dim_brand.home_market",
-              "nativeQueryRef": "home_market"
+              "nativeQueryRef": "Market",
+              "displayName": "Market"
             }
           ]
         }

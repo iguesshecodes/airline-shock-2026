@@ -98,7 +98,7 @@ table fact_traffic
 
 	measure 'Resilience Rank' =
 			VAR s = [Resilience Score]
-			RETURN IF(ISBLANK(s), BLANK(), RANKX(ALLSELECTED(dim_brand[brand]), [Resilience Score], , DESC, Dense))
+			RETURN IF(ISBLANK(s) || NOT HASONEVALUE(dim_brand[brand]), BLANK(), RANKX(ALLSELECTED(dim_brand), [Resilience Score], , DESC, Dense))
 		formatString: 0
 		displayFolder: 3 Scoring
 

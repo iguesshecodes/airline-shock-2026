@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dim_brand.brand",
-              "nativeQueryRef": "brand"
+              "nativeQueryRef": "Brand",
+              "displayName": "Brand"
             }
           ]
         },
@@ -45,7 +46,8 @@
                 }
               },
               "queryRef": "dim_brand.home_market",
-              "nativeQueryRef": "home_market"
+              "nativeQueryRef": "Market",
+              "displayName": "Market"
             }
           ]
         },
@@ -88,6 +90,21 @@
       }
     },
     "drillFilterOtherVisuals": true,
+    "objects": {
+      "categoryLabels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {

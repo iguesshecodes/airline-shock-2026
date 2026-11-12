@@ -2,33 +2,112 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json",
   "name": "hdr_note",
   "position": {
-    "x": 860,
-    "y": 14,
-    "width": 396,
-    "height": 48,
-    "z": 2,
-    "tabOrder": 2
+    "x": 760,
+    "y": 8,
+    "width": 500,
+    "height": 56,
+    "z": 1,
+    "tabOrder": 1
   },
   "visual": {
-    "visualType": "textbox",
+    "visualType": "shape",
     "drillFilterOtherVisuals": true,
     "objects": {
-      "general": [
+      "shape": [
         {
           "properties": {
-            "paragraphs": [
-              {
-                "textRuns": [
-                  {
-                    "value": "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
-                    "textStyle": {
-                      "fontSize": "9pt",
-                      "color": "#BFD1FF"
+            "tileShape": {
+              "expr": {
+                "Literal": {
+                  "Value": "'rectangle'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "text": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#BFD1FF'"
                     }
                   }
-                ]
+                }
               }
-            ]
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "horizontalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'right'"
+                }
+              }
+            },
+            "verticalAlignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'middle'"
+                }
+              }
+            }
           }
         }
       ]

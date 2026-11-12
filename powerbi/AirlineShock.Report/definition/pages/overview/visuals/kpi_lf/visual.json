@@ -34,6 +34,21 @@
       }
     },
     "drillFilterOtherVisuals": true,
+    "objects": {
+      "categoryLabels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {
@@ -48,7 +63,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Load factor (all)'"
+                  "Value": "'Load factor, all months'"
                 }
               }
             },
