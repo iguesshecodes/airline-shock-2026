@@ -132,6 +132,7 @@ w(f"{SM}/definition/relationships.tmdl",
 w(f"{SM}/definition/database.tmdl", "database\n\tcompatibilityLevel: 1600\n")
 w(f"{SM}/definition/model.tmdl",
   "model Model\n\tculture: en-US\n\tdefaultPowerBIDataSourceVersion: powerBI_V3\n\tdiscourageImplicitMeasures\n\n"
+  "\tannotation __PBI_TimeIntelligenceEnabled = 0\n\n"
   "ref table dim_brand\nref table dim_date\nref table fact_traffic\n")
 
 # ------------------------------------------------------------------ report

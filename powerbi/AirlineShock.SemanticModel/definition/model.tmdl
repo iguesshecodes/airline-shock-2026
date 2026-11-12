@@ -3,6 +3,8 @@ model Model
 	defaultPowerBIDataSourceVersion: powerBI_V3
 	discourageImplicitMeasures
 
+	annotation __PBI_TimeIntelligenceEnabled = 0
+
 ref table dim_brand
 ref table dim_date
 ref table fact_traffic

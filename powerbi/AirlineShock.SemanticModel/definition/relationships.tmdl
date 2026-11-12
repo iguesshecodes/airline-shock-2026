@@ -1,7 +1,7 @@
-relationship 81bf3423-1079-46d0-a09d-29e8e22b47a8
+relationship 4cfdd892-93e8-4503-8050-824c901c1ead
 	fromColumn: fact_traffic.brand_id
 	toColumn: dim_brand.brand_id
 
-relationship a35cc2b2-666f-4344-b8e9-32713f870441
+relationship 63842465-3231-49a1-8839-3b740349c0e2
 	fromColumn: fact_traffic.month
 	toColumn: dim_date.month
