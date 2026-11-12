@@ -21,6 +21,21 @@
           "name": "cobalt-theme.json",
           "path": "cobalt-theme.json",
           "type": "CustomTheme"
+        },
+        {
+          "name": "bg_overview.png",
+          "path": "bg_overview.png",
+          "type": "Image"
+        },
+        {
+          "name": "bg_playbook.png",
+          "path": "bg_playbook.png",
+          "type": "Image"
+        },
+        {
+          "name": "bg_findings.png",
+          "path": "bg_findings.png",
+          "type": "Image"
         }
       ]
     }

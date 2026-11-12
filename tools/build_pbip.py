@@ -154,7 +154,8 @@ wj(f"{RP}/definition/report.json", {
         "baseTheme": {"name": "CY24SU10", "reportVersionAtImport": "5.59", "type": "SharedResources"},
         "customTheme": {"name": "cobalt-theme.json", "reportVersionAtImport": "5.59", "type": "RegisteredResources"}},
     "resourcePackages": [{"name": "RegisteredResources", "type": "RegisteredResources",
-        "items": [{"name": "cobalt-theme.json", "path": "cobalt-theme.json", "type": "CustomTheme"}]}],
+        "items": [{"name": "cobalt-theme.json", "path": "cobalt-theme.json", "type": "CustomTheme"}] +
+                  [{"name": n, "path": n, "type": "Image"} for n in ("bg_overview.png", "bg_playbook.png", "bg_findings.png")]}],
     "layoutOptimization": "None"})
 
 lit = lambda v: {"expr": {"Literal": {"Value": v}}}
@@ -212,105 +213,84 @@ def shape_text(name, x, y, wd, ht, z, text, fill_hex=None, color="#FFFFFF", size
                                              "fontSize": lit(size), "bold": lit("true" if bold else "false"),
                                              "horizontalAlignment": S(align), "verticalAlignment": S("middle")}}]}})
 
-def hdr_box(name, x, y, wd, ht, z, text, bg, color, size, bold, align="left", pad=True):
-    paras = []
-    if pad:
-        paras.append({"textRuns": [{"value": " ", "textStyle": {"fontSize": "6pt"}}]})
-    st = {"fontSize": size, "color": color, "fontFamily": "Segoe UI Semibold" if bold else "Segoe UI"}
-    if bold: st["fontWeight"] = "bold"
-    paras.append({"textRuns": [{"value": text, "textStyle": st}], "horizontalTextAlignment": align})
-    v = {"visualType": "textbox", "drillFilterOtherVisuals": True,
-         "objects": {"general": [{"properties": {"paragraphs": paras}}]}}
-    c = container(name, x, y, wd, ht, z, v)
-    c["visual"]["visualContainerObjects"] = {
-        "background": [{"properties": {"show": lit("true"), "color": solid(bg), "transparency": lit("0D")}}] if bg else
-                      [{"properties": {"show": lit("false")}}],
-        "border": [{"properties": {"show": lit("false")}}]}
-    return c
+import subprocess, sys
+RES = f"{RP}/StaticResources/RegisteredResources"
+subprocess.check_call([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_backgrounds.py"), RES])
 
-def header(page_title_suffix=""):
-    return [hdr_box("hdr_bg", 0, 0, 1280, 72, 0, "   The 2026 airline shock: who handled it best?", INK, "#FFFFFF", "22pt", True),
-            hdr_box("hdr_note", 700, 6, 570, 60, 1,
-                    "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
-                    None, "#BFD1FF", "10pt", False, "right", pad=False)]
-
-def page(name, display, visuals, order=None):
+def page(name, display, visuals, bg):
     d = f"{RP}/definition/pages/{name}"
+    img = {"image": {"name": lit(f"'{bg}'"),
+                     "url": {"expr": {"ResourcePackageItem": {"PackageName": "RegisteredResources", "PackageType": 1, "ItemName": bg}}},
+                     "scaling": lit("'Fit'")}}
     wj(f"{d}/page.json", {
         "$schema": f"{SCH}/page/1.0.0/schema.json", "name": name, "displayName": display,
         "displayOption": "FitToPage", "height": 720, "width": 1280,
-        "objects": {"background": [{"properties": {"color": solid(PAGE), "transparency": lit("0D")}}]}})
+        "objects": {"background": [{"properties": {"color": solid(PAGE), "transparency": lit("0D"), "image": img}}]}})
     for v in visuals:
         wj(f"{d}/visuals/{v['name']}/visual.json", v)
 
+def tv(name, x, y, wd, ht, z, visual):
+    """Native visual: transparent, no border, no title. The drawn background supplies the frame and title."""
+    visual["visualContainerObjects"] = {
+        "title": [{"properties": {"show": lit("false")}}],
+        "background": [{"properties": {"show": lit("false")}}],
+        "border": [{"properties": {"show": lit("false")}}]}
+    return {"$schema": f"{SCH}/visualContainer/1.0.0/schema.json", "name": name,
+            "position": {"x": x, "y": y, "width": wd, "height": ht, "z": z, "tabOrder": z}, "visual": visual}
+
+SHOW = lambda b: [{"properties": {"show": lit("true" if b else "false")}}]
+def axis(sz="9D", grid=False, val_show=True):
+    return {"categoryAxis": [{"properties": {"show": lit("true"), "labelColor": solid(INK), "fontSize": lit(sz)}}],
+            "valueAxis": [{"properties": {"show": lit("true" if val_show else "false"), "labelColor": solid(GREY), "fontSize": lit(sz),
+                                          "gridlineShow": lit("true" if grid else "false")}}]}
+def bars(sz="9D"):
+    o = axis(sz, grid=False, val_show=False)
+    o["labels"] = [{"properties": {"show": lit("true"), "color": solid(INK), "fontSize": lit(sz)}}]
+    o["dataPoint"] = [{"properties": {"defaultColor": solid(COBALT)}}]
+    o["legend"] = SHOW(False)
+    return o
+
 # page 1 : overview
-p1 = header()
-p1.append(container("slicer_market", 24, 84, 220, 96, 3, vis("slicer", {"Values": [B("home_market")]}, objects={"header": [{"properties": {"show": lit("false")}}]}), title="Market", card=True))
-kp = [("kpi_lf", "Load factor, all months", "Load Factor"),
-      ("kpi_lfchg", "Load factor change (pts)", "LF Change (pts)"),
-      ("kpi_cap", "Capacity change", "Capacity Change %"),
-      ("kpi_pax", "Passenger change", "Passenger Change %")]
-for i, (n, t, m) in enumerate(kp):
-    p1.append(container(n, 260 + i * 252, 84, 240, 96, 4 + i,
-                        vis("card", {"Values": [MS(m)]}, objects={"categoryLabels": [{"properties": {"show": lit("false")}}]}), title=t, card=True))
-p1.append(container("scatter", 24, 192, 620, 504, 8, vis("scatterChart", {
+p1 = [tv("slicer_market", 36, 122, 176, 56, 3, vis("slicer", {"Values": [B("home_market")]}, objects={
+        "header": SHOW(False),
+        "data": [{"properties": {"mode": S("Dropdown")}}]}))]
+kp = [("kpi_lf", "Load Factor", COBALT), ("kpi_lfchg", "LF Change (pts)", "#FFFFFF"),
+      ("kpi_cap", "Capacity Change %", COBALT), ("kpi_pax", "Passenger Change %", COBALT)]
+for i, (n, m, colr) in enumerate(kp):
+    p1.append(tv(n, 236 + i * 258 + 16, 112, 214, 52, 4 + i, vis("card", {"Values": [MS(m)]}, objects={
+        "categoryLabels": SHOW(False),
+        "labels": [{"properties": {"color": solid(colr), "fontSize": lit("32D"), "fontFamily": S("Segoe UI Semibold")}}]})))
+p1.append(tv("scatter", 32, 256, 604, 432, 8, vis("scatterChart", {
     "Category": [B("brand")], "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")],
     "X": [MS("Capacity Change %")], "Y": [MS("LF Change (pts)")]},
-    objects={"categoryLabels": [{"properties": {"show": lit("true")}}]}),
-    title="Did cutting capacity protect load factor? (each dot is a brand)", card=True))
-p1.append(container("bar_resilience", 656, 192, 600, 300, 9, vis("clusteredBarChart", {
-    "Category": [B("brand")], "Y": [MS("Resilience Score")]}, sort="Resilience Score"),
-    title="Resilience score by brand (higher is better)", card=True))
-p1.append(container("line_lf", 656, 504, 600, 192, 10, vis("lineChart", {
+    objects={"categoryLabels": [{"properties": {"show": lit("true"), "fontSize": lit("9D"), "color": solid(INK)}}],
+             "legend": [{"properties": {"show": lit("true"), "position": S("Bottom"), "fontSize": lit("9D")}}],
+             **axis("9D", grid=True)})))
+p1.append(tv("bar_resilience", 664, 258, 584, 238, 9, vis("clusteredBarChart", {
+    "Category": [B("brand")], "Y": [MS("Resilience Score")]}, sort="Resilience Score", objects=bars())))
+p1.append(tv("line_lf", 664, 548, 584, 140, 10, vis("lineChart", {
     "Category": [D("month")], "Y": [MS("Load Factor")],
-    "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")]}),
-    title="Monthly load factor by market", card=True))
-page("overview", "Overview", p1)
+    "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")]},
+    objects={"legend": [{"properties": {"show": lit("true"), "position": S("Right"), "fontSize": lit("9D")}}], **axis("9D", grid=True)})))
+page("overview", "Overview", p1, "bg_overview.png")
 
 # page 2 : brand playbook
-p2 = header()
-p2.append(container("tbl_playbook", 24, 84, 1232, 270, 3, vis("tableEx", {"Values": [
+p2 = [tv("tbl_playbook", 36, 136, 1208, 236, 3, vis("tableEx", {"Values": [
     B("brand"), proj(col("dim_brand", "home_market"), "dim_brand", "home_market"),
     proj(col("dim_brand", "business_model"), "dim_brand", "business_model"),
     MS("Capacity Stance"), MS("Capacity Change %"), MS("Passenger Change %"),
-    MS("LF Change (pts)"), MS("Resilience Score"), MS("Resilience Rank"), MS("Matched Months")]}),
-    title="Brand playbook (ranked by resilience, matched months only)", card=True))
-p2.append(container("bar_pax", 24, 366, 610, 330, 4, vis("clusteredBarChart", {
-    "Category": [B("brand")], "Y": [MS("Passenger Change %")]}, sort="Passenger Change %"),
-    title="Passenger change vs 2025", card=True))
-p2.append(container("bar_lf", 646, 366, 610, 330, 5, vis("clusteredBarChart", {
-    "Category": [B("brand")], "Y": [MS("LF Change (pts)")]}, sort="LF Change (pts)"),
-    title="Load factor change (pts)", card=True))
-page("playbook", "Brand playbook", p2)
+    MS("LF Change (pts)"), MS("Resilience Score"), MS("Resilience Rank"), MS("Matched Months")]},
+    objects={"columnHeaders": [{"properties": {"fontColor": solid("#FFFFFF"), "backColor": solid(INK), "fontSize": lit("10D")}}],
+             "values": [{"properties": {"fontSize": lit("10D"), "fontColorPrimary": solid(INK), "backColorPrimary": solid("#FFFFFF")}}],
+             "grid": [{"properties": {"gridVertical": lit("false"), "gridHorizontalColor": solid(LINE)}}]})),
+      tv("bar_pax", 34, 440, 586, 248, 4, vis("clusteredBarChart", {
+          "Category": [B("brand")], "Y": [MS("Passenger Change %")]}, sort="Passenger Change %", objects=bars())),
+      tv("bar_lf", 658, 440, 586, 248, 5, vis("clusteredBarChart", {
+          "Category": [B("brand")], "Y": [MS("LF Change (pts)")]}, sort="LF Change (pts)", objects=bars()))]
+page("playbook", "Brand playbook", p2, "bg_playbook.png")
 
-# page 3 : findings and recommendations (text only, numbers verified against the CSVs in Python)
-def note_box(name, x, y, wd, ht, z, title, paras):
-    runs = []
-    for text, bold in paras:
-        runs.append({"textRuns": [{"value": text, "textStyle": {"fontSize": "12pt", **({"fontWeight": "bold"} if bold else {})}}]})
-        runs.append({"textRuns": [{"value": " ", "textStyle": {"fontSize": "6pt"}}]})
-    v = {"visualType": "textbox", "drillFilterOtherVisuals": True,
-         "objects": {"general": [{"properties": {"paragraphs": runs}}]}}
-    return container(name, x, y, wd, ht, z, v, title=title, card=True)
-
-p3 = header()
-p3.append(note_box("txt_findings", 24, 84, 740, 612, 3, "Three findings", [
-    ("1. Like for like, the shock was mild overall.", True),
-    ("Capacity +0.7%, passengers +0.2%, load factor -0.5 pts (Mar to Aug 2026 vs 2025). The average hides large differences between airlines.", False),
-    ("2. Adding capacity worked only where demand followed.", True),
-    ("Jet2 grew seats 5.7% and passengers 8.9% while load factor rose 1.2 pts. easyJet added 7.2% more seats and lost 3.6 pts of load factor.", False),
-    ("3. Cutting capacity protected load factor but cost passengers.", True),
-    ("Air India Group cut seats 9.0% and Ryanair UK 7.6%. Both held load factor (+0.5 and +0.3 pts) and lost 7.2% and 5.2% of passengers. TUI Airways is the exception: seats -3.7% and load factor -2.9 pts.", False)]))
-p3.append(note_box("txt_recs", 776, 84, 480, 300, 4, "Two recommendations", [
-    ("1. Treat load factor as a guardrail, not the goal.", True),
-    ("Cutting seats held load factor at Ryanair UK and Air India but cost 5 to 7% of passengers. Cut only where the volume lost is worth less than the cost saved.", False),
-    ("2. Add capacity only where demand is proven, and review load factor monthly.", True),
-    ("Jet2 shows growth can fill planes. easyJet shows it can dilute them.", False)]))
-p3.append(note_box("txt_limits", 776, 396, 480, 300, 5, "Limits and assumptions", [
-    ("Simulated brief: Head of Network and Revenue at a mid-size airline. Descriptive, not causal.", False),
-    ("10 airlines, 6 months. SpiceJet excluded (no 2025 data). UK (CAA) and India (DGCA) definitions differ. No yield or fare data, so profit and pricing are not assessed.", False),
-    ("Wizz Air UK passengers rose while seat-km fell, probably shorter average routes. Not verified.", False)]))
-page("findings", "Findings", p3)
+# page 3 : findings, fully drawn in the background (no native visuals)
+page("findings", "Findings", [], "bg_findings.png")
 
 wj(f"{RP}/definition/pages/pages.json", {
     "$schema": f"{SCH}/pagesMetadata/1.0.0/schema.json",
