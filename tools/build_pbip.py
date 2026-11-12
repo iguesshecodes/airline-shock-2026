@@ -83,7 +83,7 @@ w(f"{SM}/definition/tables/dim_date.tmdl",
 
 # fact_traffic with measures
 M = []
-M.append(measure("Passengers", "SUM(fact_traffic[passengers])", "#,0", "1 Base"))
+M.append(measure("Total Passengers", "SUM(fact_traffic[passengers])", "#,0", "1 Base"))
 M.append(measure("Load Factor", "DIVIDE(SUM(fact_traffic[rpk_k]), SUM(fact_traffic[ask_k]))", "0.0%", "1 Base",
                  "Passenger-km divided by seat-km. Always recomputed from sums, never averaged."))
 M.append(measure("Capacity (ASK m)", "SUM(fact_traffic[ask_k]) / 1000", "#,0", "1 Base"))

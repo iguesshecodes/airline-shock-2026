@@ -40,7 +40,7 @@ table fact_traffic
 		summarizeBy: none
 		sourceColumn: window
 
-	measure Passengers = SUM(fact_traffic[passengers])
+	measure 'Total Passengers' = SUM(fact_traffic[passengers])
 		formatString: #,0
 		displayFolder: 1 Base
 
