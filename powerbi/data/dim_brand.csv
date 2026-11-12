@@ -1,0 +1,12 @@
+brand,home_market,brand_id,business_model
+"Air India Group",India,1,Full-service
+"Akasa Air",India,2,Low-cost
+IndiGo,India,3,Low-cost
+SpiceJet,India,4,Low-cost
+"British Airways",UK,5,Full-service
+Jet2,UK,6,Leisure
+"Ryanair UK",UK,7,Low-cost
+"TUI Airways",UK,8,Leisure
+"Virgin Atlantic",UK,9,Full-service
+"Wizz Air UK",UK,10,Low-cost
+"easyJet UK",UK,11,Low-cost
