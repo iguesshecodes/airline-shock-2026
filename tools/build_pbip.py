@@ -212,11 +212,27 @@ def shape_text(name, x, y, wd, ht, z, text, fill_hex=None, color="#FFFFFF", size
                                              "fontSize": lit(size), "bold": lit("true" if bold else "false"),
                                              "horizontalAlignment": S(align), "verticalAlignment": S("middle")}}]}})
 
+def hdr_box(name, x, y, wd, ht, z, text, bg, color, size, bold, align="left", pad=True):
+    paras = []
+    if pad:
+        paras.append({"textRuns": [{"value": " ", "textStyle": {"fontSize": "6pt"}}]})
+    st = {"fontSize": size, "color": color, "fontFamily": "Segoe UI Semibold" if bold else "Segoe UI"}
+    if bold: st["fontWeight"] = "bold"
+    paras.append({"textRuns": [{"value": text, "textStyle": st}], "horizontalTextAlignment": align})
+    v = {"visualType": "textbox", "drillFilterOtherVisuals": True,
+         "objects": {"general": [{"properties": {"paragraphs": paras}}]}}
+    c = container(name, x, y, wd, ht, z, v)
+    c["visual"]["visualContainerObjects"] = {
+        "background": [{"properties": {"show": lit("true"), "color": solid(bg), "transparency": lit("0D")}}] if bg else
+                      [{"properties": {"show": lit("false")}}],
+        "border": [{"properties": {"show": lit("false")}}]}
+    return c
+
 def header(page_title_suffix=""):
-    return [shape_text("hdr_bg", 0, 0, 1280, 72, 0, "  The 2026 airline shock: who handled it best?", INK, "#FFFFFF", "22D", True),
-            shape_text("hdr_note", 760, 8, 500, 56, 1,
-                       "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
-                       None, "#BFD1FF", "10D", False, "right")]
+    return [hdr_box("hdr_bg", 0, 0, 1280, 72, 0, "   The 2026 airline shock: who handled it best?", INK, "#FFFFFF", "22pt", True),
+            hdr_box("hdr_note", 700, 6, 570, 60, 1,
+                    "Mar to Aug 2026 vs Mar to Aug 2025, like for like. SpiceJet excluded (no 2025 data).",
+                    None, "#BFD1FF", "10pt", False, "right", pad=False)]
 
 def page(name, display, visuals, order=None):
     d = f"{RP}/definition/pages/{name}"
