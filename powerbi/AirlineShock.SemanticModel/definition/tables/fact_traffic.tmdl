@@ -1,0 +1,124 @@
+table fact_traffic
+
+	column month
+		dataType: dateTime
+		formatString: mmm yyyy
+		isHidden
+		summarizeBy: none
+		sourceColumn: month
+
+	column brand_id
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: brand_id
+
+	column passengers
+		dataType: double
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: passengers
+
+	column rpk_k
+		dataType: double
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: rpk_k
+
+	column ask_k
+		dataType: double
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: ask_k
+
+	column window
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: window
+
+	measure Passengers = SUM(fact_traffic[passengers])
+		formatString: #,0
+		displayFolder: 1 Base
+
+	/// Passenger-km divided by seat-km. Always recomputed from sums, never averaged.
+	measure 'Load Factor' = DIVIDE(SUM(fact_traffic[rpk_k]), SUM(fact_traffic[ask_k]))
+		formatString: 0.0%
+		displayFolder: 1 Base
+
+	measure 'Capacity (ASK m)' = SUM(fact_traffic[ask_k]) / 1000
+		formatString: #,0
+		displayFolder: 1 Base
+
+	measure 'LF Shock' = CALCULATE([Load Factor], fact_traffic[window] = "Shock")
+		formatString: 0.0%
+		displayFolder: 2 Shock vs baseline
+
+	measure 'LF Baseline' = CALCULATE([Load Factor], fact_traffic[window] = "Baseline")
+		formatString: 0.0%
+		displayFolder: 2 Shock vs baseline
+
+	/// Load factor change in percentage points, matched months only.
+	measure 'LF Change (pts)' = IF(ISBLANK([LF Shock]) || ISBLANK([LF Baseline]), BLANK(), ([LF Shock] - [LF Baseline]) * 100)
+		formatString: "+0.0;-0.0;0.0"
+		displayFolder: 2 Shock vs baseline
+
+	measure 'ASK Shock' = CALCULATE(SUM(fact_traffic[ask_k]), fact_traffic[window] = "Shock")
+		formatString: #,0
+		displayFolder: 2 Shock vs baseline
+
+	measure 'ASK Baseline' = CALCULATE(SUM(fact_traffic[ask_k]), fact_traffic[window] = "Baseline")
+		formatString: #,0
+		displayFolder: 2 Shock vs baseline
+
+	/// Seat-km change, same months in both years.
+	measure 'Capacity Change %' = DIVIDE([ASK Shock] - [ASK Baseline], [ASK Baseline])
+		formatString: "+0.0%;-0.0%;0.0%"
+		displayFolder: 2 Shock vs baseline
+
+	measure 'Pax Shock' = CALCULATE(SUM(fact_traffic[passengers]), fact_traffic[window] = "Shock")
+		formatString: #,0
+		displayFolder: 2 Shock vs baseline
+
+	measure 'Pax Baseline' = CALCULATE(SUM(fact_traffic[passengers]), fact_traffic[window] = "Baseline")
+		formatString: #,0
+		displayFolder: 2 Shock vs baseline
+
+	measure 'Passenger Change %' = DIVIDE([Pax Shock] - [Pax Baseline], [Pax Baseline])
+		formatString: "+0.0%;-0.0%;0.0%"
+		displayFolder: 2 Shock vs baseline
+
+	/// Passenger change in % points plus load factor change in points, equal weights. A simple, documented rule, not a model.
+	measure 'Resilience Score' = IF(ISBLANK([Passenger Change %]) || ISBLANK([LF Change (pts)]), BLANK(), [Passenger Change %] * 100 + [LF Change (pts)])
+		formatString: "+0.0;-0.0;0.0"
+		displayFolder: 3 Scoring
+
+	measure 'Resilience Rank' =
+			VAR s = [Resilience Score]
+			RETURN IF(ISBLANK(s), BLANK(), RANKX(ALLSELECTED(dim_brand[brand]), [Resilience Score], , DESC, Dense))
+		formatString: 0
+		displayFolder: 3 Scoring
+
+	/// Cut or added means a change of 2% or more.
+	measure 'Capacity Stance' =
+			VAR c = [Capacity Change %]
+			RETURN IF(ISBLANK(c), "No matched data", IF(c >= 0.02, "Added capacity", IF(c <= -0.02, "Cut capacity", "Held capacity")))
+		displayFolder: 3 Scoring
+
+	/// Months compared like for like (6 for every brand with 2025 data).
+	measure 'Matched Months' = CALCULATE(DISTINCTCOUNT(fact_traffic[month]), fact_traffic[window] = "Shock")
+		formatString: 0
+		displayFolder: 3 Scoring
+
+	partition fact_traffic = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/iguesshecodes/airline-shock-2026/main/powerbi/data/fact_traffic.csv"), [Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+					Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					Typed = Table.TransformColumnTypes(Promoted, {{"month", type date}, {"brand_id", Int64.Type}, {"passengers", type number}, {"rpk_k", type number}, {"ask_k", type number}, {"window", type text}}, "en-US")
+				in
+					Typed

@@ -1,0 +1,266 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json",
+  "name": "tbl_playbook",
+  "position": {
+    "x": 24,
+    "y": 84,
+    "width": 1232,
+    "height": 330,
+    "z": 3,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_brand"
+                    }
+                  },
+                  "Property": "brand"
+                }
+              },
+              "queryRef": "dim_brand.brand",
+              "nativeQueryRef": "brand"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_brand"
+                    }
+                  },
+                  "Property": "home_market"
+                }
+              },
+              "queryRef": "dim_brand.home_market",
+              "nativeQueryRef": "home_market"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_brand"
+                    }
+                  },
+                  "Property": "business_model"
+                }
+              },
+              "queryRef": "dim_brand.business_model",
+              "nativeQueryRef": "business_model"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Capacity Stance"
+                }
+              },
+              "queryRef": "fact_traffic.Capacity Stance",
+              "nativeQueryRef": "Capacity Stance"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Capacity Change %"
+                }
+              },
+              "queryRef": "fact_traffic.Capacity Change %",
+              "nativeQueryRef": "Capacity Change %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Passenger Change %"
+                }
+              },
+              "queryRef": "fact_traffic.Passenger Change %",
+              "nativeQueryRef": "Passenger Change %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "LF Change (pts)"
+                }
+              },
+              "queryRef": "fact_traffic.LF Change (pts)",
+              "nativeQueryRef": "LF Change (pts)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Resilience Score"
+                }
+              },
+              "queryRef": "fact_traffic.Resilience Score",
+              "nativeQueryRef": "Resilience Score"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Resilience Rank"
+                }
+              },
+              "queryRef": "fact_traffic.Resilience Rank",
+              "nativeQueryRef": "Resilience Rank"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_traffic"
+                    }
+                  },
+                  "Property": "Matched Months"
+                }
+              },
+              "queryRef": "fact_traffic.Matched Months",
+              "nativeQueryRef": "Matched Months"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Brand playbook (ranked by resilience, matched months only)'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#111111'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E5E7EB'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "6D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -18,3 +18,7 @@ Downloaded 2026-11-11. Raw files are kept out of Git (raw/ is in .gitignore).
 | raw/company | Emirates Group H1 2025-26 fast facts (PDF) | https://www.emirates.com/media-centre/ | Apr to Sep 2025 | Comparison base for H1 2026-27. |
 | raw/company | IndiGo Q2 FY27 earnings call transcript (PDF, NSE filing) | https://nsearchives.nseindia.com/corporate/Indigo1_04112026174231_Transcript_Q2_FY27.pdf | Jul to Sep 2026 | Results dated 29 Oct 2026. Press release itself not yet saved. |
 | raw/caa | CAA Sep and Oct 2026 | n/a | not published yet | Pages redirect as of 12 Nov 2026. Re-check later. |
+
+## Methodology note: matched months (added 12 Nov 2026)
+Found while fact-checking the first Power BI build against the raw CSVs. The first dashboard compared Mar to Sep 2026 against Mar to Sep 2025, but Sep 2026 is not published for the UK brands and Air India, so the shock window held 6 months and the baseline 7. Summed capacity looked about 14% lower for those brands. That was a window-length artefact, not a real capacity cut.
+Fix: fact_traffic.window flags only months present for the brand in both years (Mar to Aug, 6 months). SpiceJet has no 2025 data and is excluded from every shock comparison. Load factor is always SUM(rpk) / SUM(ask). SQL files already used Mar to Aug and were unaffected.

@@ -1,0 +1,32 @@
+table dim_brand
+
+	column brand
+		dataType: string
+		summarizeBy: none
+		sourceColumn: brand
+
+	column home_market
+		dataType: string
+		summarizeBy: none
+		sourceColumn: home_market
+
+	column brand_id
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: brand_id
+
+	column business_model
+		dataType: string
+		summarizeBy: none
+		sourceColumn: business_model
+
+	partition dim_brand = m
+		mode: import
+		source =
+				let
+					Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/iguesshecodes/airline-shock-2026/main/powerbi/data/dim_brand.csv"), [Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+					Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					Typed = Table.TransformColumnTypes(Promoted, {{"brand", type text}, {"home_market", type text}, {"brand_id", Int64.Type}, {"business_model", type text}}, "en-US")
+				in
+					Typed

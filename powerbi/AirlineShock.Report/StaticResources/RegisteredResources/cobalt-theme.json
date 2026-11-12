@@ -1,0 +1,36 @@
+{
+  "name": "Airline Shock Cobalt",
+  "dataColors": [
+    "#0047FF",
+    "#111111",
+    "#7FA3FF",
+    "#6B7280",
+    "#BFD1FF",
+    "#374151",
+    "#2E6BFF",
+    "#A3A3A3"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#111111",
+  "tableAccent": "#0047FF",
+  "good": "#0047FF",
+  "bad": "#111111",
+  "neutral": "#6B7280",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 13,
+      "color": "#111111"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#6B7280"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 28,
+      "color": "#0047FF"
+    }
+  }
+}
