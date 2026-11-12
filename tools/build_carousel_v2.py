@@ -6,21 +6,21 @@ from pygments import highlight
 from pygments.lexers import SqlLexer, PythonLexer
 from pygments.formatters import HtmlFormatter
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); OUT=sys.argv[1]
-CB,INK,LB="#0047FF","#07080B","#7FA2FF"
+CB,INK,LB="#0047FF","#0A0B10","#0047FF"
 def b64(p): return base64.b64encode(open(p,"rb").read()).decode()
 def ff(fam,w,n,style="normal"): return f"@font-face{{font-family:{fam};font-weight:{w};font-style:{style};src:url(data:font/woff2;base64,{b64(f'{HERE}/fonts/{n}.woff2')}) format('woff2')}}"
 def img(n): return "data:image/png;base64,"+b64(f"{ROOT}/portfolio/assets/{n}.png")
 CSS=(ff("Geist",500,"Geist-Medium")+ff("Geist",700,"Geist-Bold")+ff("Mono",500,"GeistMono-Medium")+ff("Mono",600,"GeistMono-SemiBold")+ff("Hand",700,"Caveat-Bold")+ff("Stix",400,"StixTwo-Italic","italic")+ff("Stix",400,"StixTwo-Regular")+
 f"""*{{box-sizing:border-box;margin:0;padding:0}}
-body{{width:1080px;height:1350px;position:relative;overflow:hidden;font-family:Geist;color:#fff;background:{INK};-webkit-font-smoothing:antialiased}}
+body{{width:1080px;height:1350px;position:relative;overflow:hidden;font-family:Geist;color:{INK};background:#F4F6FB;-webkit-font-smoothing:antialiased}}
 .a{{position:absolute}} .h{{font-weight:700;letter-spacing:-0.06em;line-height:.92}}
 .mono{{font-family:Mono;font-weight:600;letter-spacing:.03em}}
 .hand{{font-family:Hand;font-weight:700;color:{LB}}}
-.fm{{font-family:Stix;font-style:italic;color:rgba(255,255,255,.9);white-space:nowrap}} .fm sub{{font-size:.62em}}
-.tag{{border-radius:14px;padding:9px 18px 11px;font-weight:700;letter-spacing:-0.03em;white-space:nowrap;border:4px solid #fff;box-shadow:0 8px 0 rgba(0,40,160,.55)}}
-.blk{{background:{CB};display:inline-block;padding:2px 18px 10px}} .wht{{background:#fff;color:{INK};display:inline-block;padding:2px 18px 10px}}
-.glow{{background:radial-gradient(900px 600px at 100% 0%,rgba(0,71,255,.38),transparent 60%),radial-gradient(800px 600px at 0% 100%,rgba(0,71,255,.30),transparent 60%)}}
-.shot{{background:#fff;border:6px solid #fff;border-radius:16px;box-shadow:0 18px 0 rgba(0,45,180,.5),0 0 0 2px #000;overflow:hidden}}
+.fm{{font-family:Stix;font-style:italic;color:rgba(10,11,16,.85);white-space:nowrap}} .fm sub{{font-size:.62em}}
+.tag{{border-radius:14px;padding:9px 18px 11px;font-weight:700;letter-spacing:-0.03em;white-space:nowrap;border:4px solid #fff;box-shadow:0 8px 0 rgba(0,40,160,.25),0 0 0 2px #0A0B10}}
+.blk{{background:{CB};color:#fff;display:inline-block;padding:2px 18px 10px}} .wht{{background:{INK};color:#fff;display:inline-block;padding:2px 18px 10px}}
+.glow{{background-color:#F4F6FB;background-image:linear-gradient(#DDE3F0 1px,transparent 1px),linear-gradient(90deg,#DDE3F0 1px,transparent 1px);background-size:30px 30px}}
+.shot{{background:#fff;border:6px solid #fff;border-radius:16px;box-shadow:0 14px 0 rgba(0,45,180,.22),0 0 0 3px #0A0B10;overflow:hidden}}
 .shot img{{display:block;width:100%}}
 .code{{background:#14161C;border-radius:16px;border:3px solid #fff;box-shadow:0 14px 0 rgba(0,45,180,.5);overflow:hidden}}
 .code .t{{background:#000;padding:10px 18px;font-family:Mono;font-weight:600;font-size:16px;color:#9AA4B8}}
@@ -33,7 +33,7 @@ def cur(x,y,s=84): return f'<div class="a" style="left:{x}px;top:{y}px;filter:dr
 def tag(x,y,t,rot=0,bg="#fff",col=INK,fs=30,bd="#fff"): return f'<div class="a tag" style="left:{x}px;top:{y}px;transform:rotate({rot}deg);font-size:{fs}px;background:{bg};color:{col};border-color:{bd};line-height:1.05;text-align:center">{t}</div>'
 def fm(x,y,t,fs=40,rot=0,op=1): return f'<div class="a fm" style="left:{x}px;top:{y}px;font-size:{fs}px;transform:rotate({rot}deg);opacity:{op}">{t}</div>'
 def arrow(d,c=LB,w=7): return f'<svg class="a" style="left:0;top:0" width="1080" height="1350"><path d="{d}" fill="none" stroke="{c}" stroke-width="{w}" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-def foot(n): return f'<div class="a mono" style="left:60px;bottom:40px;font-size:21px">VARESH NIRBHAVNE</div><div class="a mono" style="right:60px;bottom:40px;font-size:21px">{n} / 4</div>'
+def foot(n): return f'<div class="a mono" style="left:60px;bottom:40px;font-size:21px;color:{INK}">VARESH NIRBHAVNE</div><div class="a mono" style="right:60px;bottom:40px;font-size:21px">{n} / 4</div>'
 def chip(x,y,t,rot): return f'<div class="a tag" style="left:{x}px;top:{y}px;transform:rotate({rot}deg);font-family:Mono;font-size:24px;background:#fff;color:#000;border-radius:16px;padding:10px 20px">{t}</div>'
 def code_src(path,a,b): return "".join(open(f"{ROOT}/{path}").read().splitlines(True)[a:b])
 def code_block(path,lexer,a,b): return highlight(code_src(path,a,b),lexer,HtmlFormatter(nowrap=True,style="monokai"))
@@ -43,21 +43,14 @@ def codebox(x,y,w,title,body,fs,rot,hh=None):
 
 def s1():
     h='<div class="a glow" style="inset:0"></div>'
-    h+=fm(600,40,'N(x | μ, Σ)  =  1 / ((2π)<sup style="font-size:.6em">d/2</sup>|Σ|<sup style="font-size:.6em">1/2</sup>)',26,0,.0)
-    h+=fm(640,56,'LF = Σ RPK / Σ ASK',44,-3,.9)
-    h+=fm(660,128,'Score = ΔPax% × 100 + ΔLF',34,-3,.65)
-    h+=f'<div class="a mono" style="left:60px;top:56px;font-size:21px;color:{LB}">10 AIRLINES / UK + INDIA<br>MAR TO AUG 2026 VS 2025</div>'
-    h+='<div class="a h" style="left:56px;top:176px;font-size:60px">I compared how 10 airlines handled</div>'
-    h+='<div class="a h" style="left:52px;top:240px;font-size:112px">THE 2026 SHOCK</div>'
-    h+='<div class="a h" style="left:56px;top:350px;font-size:62px"><span class="blk">half cut seats.</span> half added them.</div>'
-    h+=chip(70,444,"Power BI",-4)+chip(262,432,"SQL",3)+chip(380,444,"Python",-3)
-    h+=f'<div class="a shot" style="left:-30px;top:540px;width:1140px;transform:rotate(-2deg);border-radius:0;border-width:8px"><img src="{img("overview")}"></div>'
-    h+=tag(640,500,f'Jet2<br><span style="color:{CB};font-size:50px">+8.9%</span> pax',4,fs=26,col=INK)
-    h+=tag(235,905,f'Air India Group<br><span style="font-size:50px">-7.2%</span> pax',-5,fs=26,col=INK)
-    h+=tag(770,1170,f'easyJet UK<br><span style="color:{LB};font-size:50px">-3.6</span> pts LF',4,bg=INK,col="#fff",fs=26)
-    h+=star(930,420,80,rot=12)+star(30,520,60,rot=-12)+cur(470,985)
-    h+=f'<div class="a hand" style="left:70px;top:1236px;font-size:42px">real Power BI. code on slide 3.</div>'
-    h+=arrow("M500 1262 C 540 1250, 580 1262, 608 1282")
+    h+=f'<div class="a mono" style="left:60px;top:60px;font-size:22px;color:{CB}">10 AIRLINES / UK + INDIA / MAR TO AUG 2026 VS 2025</div>'
+    h+='<div class="a h" style="left:52px;top:130px;font-size:132px">Half cut seats.</div>'
+    h+='<div class="a h" style="left:52px;top:262px;font-size:132px">Half <span class="blk">added them.</span></div>'
+    h+='<div class="a" style="left:60px;top:420px;width:760px;font-size:40px;font-weight:500;letter-spacing:-0.04em;line-height:1.12">Who came out ahead after the 2026 shock?</div>'
+    h+=f'<div class="a shot" style="left:50px;top:560px;width:980px;transform:rotate(-1.5deg)"><img src="{img("overview")}"></div>'
+    h+=tag(700,500,f'Jet2 carried<br><span style="color:{CB};font-size:48px">+8.9%</span> more passengers',3,fs=24,col=INK)
+    h+=f'<div class="a hand" style="left:70px;top:1180px;font-size:48px">real data, real Power BI</div>'
+    h+=arrow("M470 1215 C 520 1200, 570 1215, 600 1240",c=CB,w=7)
     h+=foot(1); return h
 
 def s2():
@@ -79,7 +72,7 @@ def s3():
     sql=code_src("sql/02_capacity_vs_load_factor.sql",1,22)
     dim=highlight(sql*3,SqlLexer(),HtmlFormatter(nowrap=True))
     h='<div class="a glow" style="inset:0"></div>'
-    h+=f'<pre class="a hl" style="left:-20px;top:20px;font-family:Mono;font-size:30px;line-height:1.3;color:#fff;opacity:.06;white-space:pre;transform:rotate(-4deg)">{sql*3}</pre>'
+    h+=f'<pre class="a hl" style="left:-20px;top:20px;font-family:Mono;font-size:30px;line-height:1.3;color:#0A0B10;opacity:.05;white-space:pre;transform:rotate(-4deg)">{sql*3}</pre>'
     h+='<div class="a h" style="left:52px;top:52px;font-size:98px">Not just a chart.</div>'
     h+='<div class="a h" style="left:52px;top:150px;font-size:98px"><span class="blk">The work</span> behind it.</div>'
     h+=f'<div class="a shot" style="left:40px;top:330px;width:1000px;transform:rotate(-1.4deg)"><img src="{img("playbook")}"></div>'
@@ -106,7 +99,7 @@ def s4():
     h+=cur(880,1225,60)
     h+=f'<div class="a mono" style="right:60px;bottom:40px;font-size:21px;opacity:0">.</div>'
     h+=f'<div class="a mono" style="right:60px;bottom:40px;font-size:21px">4 / 4</div>'
-    return h
+    return '<div style="color:#fff">'+h+'</div>'
 os.makedirs(OUT,exist_ok=True)
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1080,"height":1350},device_scale_factor=1.5)
