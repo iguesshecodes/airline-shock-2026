@@ -28,7 +28,7 @@ def squig(x,y,w,c=CB): return f'<svg class="a" style="left:{x}px;top:{y}px" widt
 def arrow(d,c=CB,w=8): return f'<svg class="a" style="left:0;top:0" width="1080" height="1350"><path d="{d}" fill="none" stroke="{c}" stroke-width="{w}" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 def foot(n,dark=False):
     c = "#fff" if dark else INK
-    return f'<div class="a mono" style="left:60px;bottom:44px;font-size:22px;color:{c}">VARESH NIRBHAVNE</div><div class="a mono" style="right:60px;bottom:44px;font-size:22px;color:{c}">{n} / 3</div>'
+    return f'<div class="a mono" style="left:60px;bottom:44px;font-size:22px;color:{c}">VARESH NIRBHAVNE</div><div class="a mono" style="right:60px;bottom:44px;font-size:22px;color:{c}">{n} / 4</div>'
 
 def s1():
     h = f'<div class="grid a" style="inset:0"></div>'
@@ -117,8 +117,8 @@ def s3():
     h += f'<div class="a" style="left:60px;top:900px;width:960px;background:#fff;border-radius:22px;box-shadow:0 12px 0 rgba(0,20,90,.35),0 0 0 3px {INK};padding:30px 38px"><div class="mono" style="font-size:22px;color:{CB}">THE HONEST BIT</div><div style="margin-top:10px;font-size:30px;font-weight:500;letter-spacing:-0.02em;line-height:1.3">Descriptive, not causal. No fare data, so no profit view. UK CAA and India DGCA define load factor slightly differently. SpiceJet left out (no 2025 data).</div></div>'
     h += f'<div class="a h" style="left:60px;top:1150px;font-size:70px;color:#fff">Built in Power BI, SQL, Python.</div>'
     h += stk(60,1236,"github.com/iguesshecodes/airline-shock-2026",-1.5,fs=30)
-    h += cursor(960,1240,76)
-    h += f'<div class="a mono" style="right:60px;bottom:44px;font-size:22px;color:#fff">3 / 3</div>'
+    h += cursor(880,1225,70)
+    h += f'<div class="a mono" style="right:60px;bottom:44px;font-size:22px;color:#fff">4 / 4</div>'
     return h
 
 os.makedirs(OUT,exist_ok=True)
@@ -126,6 +126,35 @@ with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1080,"height":1350},device_scale_factor=1.5)
     for i,fn in enumerate((s1,s2,s3),1):
         pg.set_content(f"<style>{CSS}</style><body>{fn()}</body>"); pg.wait_for_timeout(400)
-        pg.screenshot(path=f"{OUT}/slide_{i}.png")
+        pg.screenshot(path=f"{OUT}/slide_{i if i<3 else 4}.png")
     b.close()
 print("ok")
+
+# ---- slide 4: code proof (real code from the repo), optional Power BI screenshot ----
+from pygments import highlight
+from pygments.lexers import SqlLexer, PythonLexer
+from pygments.formatters import HtmlFormatter
+ROOT=os.path.dirname(HERE)
+def code_html(path,lexer,lines):
+    src="".join(open(f"{ROOT}/{path}").read().splitlines(True)[lines[0]:lines[1]])
+    return highlight(src,lexer,HtmlFormatter(nowrap=True,style="monokai"))
+sql=code_html("sql/02_capacity_vs_load_factor.sql",SqlLexer(),(1,22))
+py=code_html("notebooks/05_matched_windows.py",PythonLexer(),(20,32))
+pbi=os.path.join(ROOT,"portfolio/assets/powerbi_overview.png")
+pbi_html=""
+if os.path.exists(pbi):
+    b=base64.b64encode(open(pbi,"rb").read()).decode()
+    pbi_html=f'<div class="a" style="left:60px;top:1010px;width:960px;border-radius:14px;overflow:hidden;box-shadow:0 12px 0 rgba(0,36,140,.18),0 0 0 3px {INK}"><img src="data:image/png;base64,{b}" style="width:100%;display:block"></div>'
+def s4():
+    h='<div class="grid a" style="inset:0"></div>'
+    h+=f'<div class="a h" style="left:52px;top:52px;font-size:96px">Not just a chart.</div><div class="a h" style="left:52px;top:150px;font-size:96px"><span class="blk">The work</span> behind it.</div>'
+    box=lambda x,y,w,hh,title,code,fs: f'<div class="a" style="left:{x}px;top:{y}px;width:{w}px;height:{hh}px;background:#16181D;border-radius:18px;box-shadow:0 12px 0 rgba(0,36,140,.25),0 0 0 3px {INK};overflow:hidden"><div style="background:#0B0B0C;padding:12px 20px;font-family:Mono;font-weight:600;font-size:17px;color:#9AA4B8;letter-spacing:.03em">{title}</div><pre class="hl" style="margin:0;padding:16px 22px;font-family:Mono;font-weight:500;font-size:{fs}px;line-height:1.38;color:#E8EAF0;white-space:pre-wrap">{code}</pre></div>'
+    h+=box(60,290,960,540,"sql/02_capacity_vs_load_factor.sql",sql,15)
+    h+=box(60,850,960,400,"notebooks/05_matched_windows.py",py,15)
+    h+=pbi_html
+    h+=star(930,240,80,rot=10)+foot(3)
+    return h
+with sync_playwright() as p:
+    b=p.chromium.launch(); pg=b.new_page(viewport={"width":1080,"height":1350},device_scale_factor=1.5)
+    pg.set_content(f"<style>{CSS}{HtmlFormatter(style='monokai').get_style_defs('.hl')}.hl{{background:none}}</style><body>{s4()}</body>"); pg.wait_for_timeout(400)
+    pg.screenshot(path=f"{OUT}/slide_3.png"); b.close()
