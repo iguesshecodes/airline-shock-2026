@@ -250,6 +250,12 @@ def bars(sz="9D"):
     o["legend"] = SHOW(False)
     return o
 
+def footer(z):
+    run = {"value": "Sources: UK CAA and India DGCA public traffic data. Analysis in SQL, Python and Power BI.",
+           "textStyle": {"fontSize": "9pt", "color": GREY, "fontFamily": "Segoe UI"}}
+    return tv("footer", 24, 698, 900, 20, z, {"visualType": "textbox", "drillFilterOtherVisuals": True,
+              "objects": {"general": [{"properties": {"paragraphs": [{"textRuns": [run]}]}}]}})
+
 # page 1 : overview
 p1 = [tv("slicer_market", 36, 122, 176, 56, 3, vis("slicer", {"Values": [B("home_market")]}, objects={
         "header": SHOW(False),
@@ -272,6 +278,7 @@ p1.append(tv("line_lf", 664, 548, 584, 140, 10, vis("lineChart", {
     "Category": [D("month")], "Y": [MS("Load Factor")],
     "Series": [proj(col("dim_brand", "home_market"), "dim_brand", "home_market")]},
     objects={"legend": [{"properties": {"show": lit("true"), "position": S("Right"), "fontSize": lit("9D")}}], **axis("9D", grid=True)})))
+p1.append(footer(20))
 page("overview", "Overview", p1, "bg_overview.png")
 
 # page 2 : brand playbook
@@ -287,10 +294,11 @@ p2 = [tv("tbl_playbook", 36, 136, 1208, 236, 3, vis("tableEx", {"Values": [
           "Category": [B("brand")], "Y": [MS("Passenger Change %")]}, sort="Passenger Change %", objects=bars())),
       tv("bar_lf", 658, 440, 586, 248, 5, vis("clusteredBarChart", {
           "Category": [B("brand")], "Y": [MS("LF Change (pts)")]}, sort="LF Change (pts)", objects=bars()))]
+p2.append(footer(20))
 page("playbook", "Brand playbook", p2, "bg_playbook.png")
 
 # page 3 : findings, fully drawn in the background (no native visuals)
-page("findings", "Findings", [], "bg_findings.png")
+page("findings", "Findings", [footer(20)], "bg_findings.png")
 
 wj(f"{RP}/definition/pages/pages.json", {
     "$schema": f"{SCH}/pagesMetadata/1.0.0/schema.json",
